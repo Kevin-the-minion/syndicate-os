@@ -13,7 +13,7 @@ jobs:
       - name: Shell syntax
         run: |
           set -e
-          for f in bootstrap.sh verify.sh scripts/*.sh minions/setup-minions.sh; do
+          for f in bootstrap.sh verify.sh scripts/*.sh drivers/*.sh minions/setup-minions.sh; do
             bash -n "$f" && echo "ok: $f"
           done
 
