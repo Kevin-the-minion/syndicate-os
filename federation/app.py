@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -31,6 +31,7 @@ DATA_DIR = Path(os.environ.get("DATA_DIR", "./data"))
 SEMANTICA_API = os.environ.get("SEMANTICA_API", "http://localhost:8765")
 HERMES_BIN = os.environ.get("HERMES_BIN", "hermes")
 DISPATCH_TIMEOUT = int(os.environ.get("DISPATCH_TIMEOUT", "300"))
+FEDERATION_TOKEN = os.environ.get("FEDERATION_TOKEN", "")
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 BOARD_PATH = DATA_DIR / "board.jsonl"
@@ -44,6 +45,14 @@ app = FastAPI(title="Syndicate OS Federation", version="0.1.1")
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
 )
+
+
+# ── optional write-auth ────────────────────────────────────────────────────
+# If FEDERATION_TOKEN is set, write endpoints require the header. Unset =
+# open board (v1 LAN default). Read endpoints stay open for browsing.
+def require_write_auth(x_syndicate_token: str = Header(default="")):
+    if FEDERATION_TOKEN and x_syndicate_token != FEDERATION_TOKEN:
+        raise HTTPException(401, "X-Syndicate-Token missing or wrong")
 
 
 # ── helpers ────────────────────────────────────────────────────────────────
@@ -233,7 +242,7 @@ class RecordIn(BaseModel):
 
 # ── board ──────────────────────────────────────────────────────────────────
 
-@app.post("/post")
+@app.post("/post", dependencies=[Depends(require_write_auth)])
 def post(p: PostIn):
     rec = {
         "id": uuid.uuid4().hex[:12],
@@ -271,7 +280,7 @@ def threads(limit: int = Query(50, le=500)):
 
 # ── tenders ────────────────────────────────────────────────────────────────
 
-@app.post("/tenders")
+@app.post("/tenders", dependencies=[Depends(require_write_auth)])
 def mint_tender(t: TenderIn):
     tenders = _tenders()
     seq = _tender_seq(tenders) + 1
@@ -312,7 +321,7 @@ def _get_tender(tid: str) -> dict:
     return tenders[tid]
 
 
-@app.post("/tenders/{tid}/claim")
+@app.post("/tenders/{tid}/claim", dependencies=[Depends(require_write_auth)])
 def claim_tender(tid: str, a: TenderAction):
     tenders = _tenders()
     t = tenders.get(tid)
@@ -328,7 +337,7 @@ def claim_tender(tid: str, a: TenderAction):
     return {"status": "claimed", "id": tid}
 
 
-@app.post("/tenders/{tid}/award")
+@app.post("/tenders/{tid}/award", dependencies=[Depends(require_write_auth)])
 def award_tender(tid: str, a: TenderAction):
     tenders = _tenders()
     t = tenders.get(tid)
@@ -353,7 +362,7 @@ def award_tender(tid: str, a: TenderAction):
     return {"status": "awarded", "id": tid}
 
 
-@app.post("/tenders/{tid}/close")
+@app.post("/tenders/{tid}/close", dependencies=[Depends(require_write_auth)])
 def close_tender(tid: str, c: TenderClose):
     tenders = _tenders()
     t = tenders.get(tid)
@@ -392,7 +401,7 @@ def close_tender(tid: str, c: TenderClose):
 
 # ── dispatch ───────────────────────────────────────────────────────────────
 
-@app.post("/dispatch")
+@app.post("/dispatch", dependencies=[Depends(require_write_auth)])
 def dispatch(d: DispatchIn):
     """Run a real agent: hermes chat -p <agent> -q <prompt>.
 
@@ -427,7 +436,7 @@ def dispatch(d: DispatchIn):
 
 # ── acks / outcomes ────────────────────────────────────────────────────────
 
-@app.post("/ack")
+@app.post("/ack", dependencies=[Depends(require_write_auth)])
 def ack(a: AckIn):
     _append(ACKS_PATH, {"agent": a.agent, "mission_id": a.mission_id, "ts": _now()})
     if a.agent:
@@ -488,7 +497,7 @@ def graph():
     return {"nodes": nodes, "edges": edges}
 
 
-@app.post("/graph/edge")
+@app.post("/graph/edge", dependencies=[Depends(require_write_auth)])
 def add_edge(e: EdgeIn):
     edges = _load_json(EDGES_PATH, [])
     edges.append({"source": e.source, "target": e.target, "label": e.label, "ts": _now()})
@@ -498,7 +507,7 @@ def add_edge(e: EdgeIn):
 
 # ── provenance passthrough ─────────────────────────────────────────────────
 
-@app.post("/semantica/record")
+@app.post("/semantica/record", dependencies=[Depends(require_write_auth)])
 def record(r: RecordIn):
     return _semantica(r.model_dump())
 

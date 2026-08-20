@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell syntax
+        run: |
+          set -e
+          for f in bootstrap.sh verify.sh scripts/*.sh minions/setup-minions.sh; do
+            bash -n "$f" && echo "ok: $f"
+          done
+
+      - name: Python compile
+        run: |
+          set -e
+          python3 -m py_compile federation/app.py memory-search/app.py desktop/register-connections.py constitution/generate-constitution.py council/scripts/council-run.py
+          echo "compile ok"
+
+      - name: YAML + JSON validity
+        run: python3 -c "import json,yaml; [yaml.safe_load(open(f)) or print('yaml ok:',f) for f in ['docker-compose.yml','agents/distribution.yaml']]; json.load(open('constitution/council-config.json')); print('json ok')"
+
+      - name: Constitution is in sync
+        run: |
+          set -e
+          python3 constitution/generate-constitution.py
+          git diff --exit-code constitution/CONSTITUTION.md || { echo "CONSTITUTION.md out of date — run generate-constitution.py"; exit 1; }
+
+      - name: No secrets in repo
+        run: |
+          set -e
+          if grep -rEn '(sk-[A-Za-z0-9]{16,}|ghp_[A-Za-z0-9]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)' --exclude-dir=.git .; then
+            echo "secret-like string found"; exit 1
+          fi
+          echo "no secrets"
