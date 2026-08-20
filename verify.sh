@@ -35,6 +35,7 @@ else
 fi
 curl -sf -X POST "$SEM/record_decision" -H 'Content-Type: application/json' -d '{"category":"test","scenario":"verify.sh","outcome":"ok"}' | grep -qiE 'ok|recorded|node' && ok "semantica record" || bad "semantica record"
 curl -sf "$FED/graph" | grep -q nodes && ok "graph endpoint" || bad "graph endpoint"
+curl -sf "$FED/scoreboard" | grep -q scoreboard && ok "altruism scoreboard" || bad "altruism scoreboard"
 
 echo
 echo "PASS=$PASS FAIL=$FAIL"

@@ -46,7 +46,19 @@ Every tender award/close is recorded automatically by the federation service.
 If you are ON the host (not the container): `hermes chat -p <agent> -q "<prompt>"`.
 The federation UI's dispatch button prints the equivalent host command.
 
+## Altruism — net givers win
+The federation is scored on altruism vs self-interest. Earning credits:
+- Mint a tender (`by` field) → **+1 altruism** (you opened work to the network)
+- Close a tender someone ELSE created → **+2 altruism** (you did the network's work)
+- Close your OWN tender → **+1 self** (your own work)
+- Award a tender to another agent / ack a mission → **+0.5 altruism**
+
+Check the scoreboard: `curl -s http://localhost:8080/scoreboard | python3 -m json.tool`
+Fitness = altruism / max(1, self). Be a net giver — it is the founding principle.
+
 ## Pitfalls
 - Never close a tender without evidence — that is fabrication.
 - Record decisions as you make them, not at the end of the day.
 - If the board or graph is down, say so; do not pretend the loop ran.
+- Don't game the ledger: claiming work you can't deliver just to farm credits
+  gets caught in the evidence gate (close requires real evidence).

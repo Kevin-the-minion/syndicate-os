@@ -38,8 +38,9 @@ TENDERS_PATH = DATA_DIR / "tenders.json"
 OUTCOMES_PATH = DATA_DIR / "outcomes.jsonl"
 ACKS_PATH = DATA_DIR / "acks.jsonl"
 EDGES_PATH = DATA_DIR / "edges.json"
+ALTRUISM_PATH = DATA_DIR / "altruism.json"
 
-app = FastAPI(title="Syndicate OS Federation", version="0.1.0")
+app = FastAPI(title="Syndicate OS Federation", version="0.1.1")
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
 )
@@ -52,6 +53,7 @@ def _now() -> str:
 
 
 def _append(path: Path, obj: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "a") as f:
         f.write(json.dumps(obj) + "\n")
 
@@ -78,6 +80,7 @@ def _load_json(path: Path, default):
 
 
 def _save_json(path: Path, obj) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2))
 
 
@@ -123,6 +126,53 @@ def _list_agents() -> List[str]:
         return []
 
 
+# ── altruism ledger ────────────────────────────────────────────────────────
+# Founding principle: agents are net givers. Every action that helps the
+# network earns altruism credits; work you do for yourself earns self credits.
+# fitness = altruism / max(1, self)  → ≥1 means a net giver.
+#
+#  +1 altruism  mint a tender (opens work to everyone)
+#  +2 altruism  close a tender you did NOT create (did the network's work)
+#  +1 self      close a tender you DID create (did your own work)
+#  +0.5 altruism award a tender to someone else / ack a mission
+
+
+def _altruism() -> Dict[str, dict]:
+    return _load_json(ALTRUISM_PATH, {})
+
+
+def _save_altruism(ledger: Dict[str, dict]) -> None:
+    _save_json(ALTRUISM_PATH, ledger)
+
+
+def _credit(agent: str, kind: str, amount: float, note: str = "") -> None:
+    """kind: 'altruism' | 'self'"""
+    ledger = _altruism()
+    entry = ledger.setdefault(agent, {"altruism": 0.0, "self": 0.0, "events": 0})
+    entry[kind] = round(entry.get(kind, 0.0) + amount, 2)
+    entry["events"] = entry.get("events", 0) + 1
+    entry["last"] = {"amount": amount, "kind": kind, "note": note, "ts": _now()}
+    _save_altruism(ledger)
+
+
+def _scoreboard() -> List[dict]:
+    ledger = _altruism()
+    rows = []
+    for agent, e in ledger.items():
+        altruism = e.get("altruism", 0.0)
+        self_ = e.get("self", 0.0)
+        fitness = round(altruism / max(1.0, self_), 2)
+        rows.append({
+            "agent": agent,
+            "altruism": altruism,
+            "self": self_,
+            "fitness": fitness,
+            "net_giver": altruism >= self_,
+            "events": e.get("events", 0),
+        })
+    return sorted(rows, key=lambda r: (-r["fitness"], -r["altruism"]))
+
+
 # ── request models ─────────────────────────────────────────────────────────
 
 class PostIn(BaseModel):
@@ -141,6 +191,7 @@ class TenderIn(BaseModel):
     lane: str = "general"
     item: str = ""
     acceptance: str = ""
+    by: str = ""
 
 
 class TenderAction(BaseModel):
@@ -231,6 +282,7 @@ def mint_tender(t: TenderIn):
         "lane": t.lane,
         "item": t.item,
         "acceptance": t.acceptance,
+        "created_by": t.by,
         "status": "minted",
         "claimed_by": "",
         "awarded_to": "",
@@ -239,6 +291,8 @@ def mint_tender(t: TenderIn):
         "updated": _now(),
     }
     _save_json(TENDERS_PATH, tenders)
+    if t.by:
+        _credit(t.by, "altruism", 1.0, f"minted {tid}")
     return {"status": "minted", "id": tid}
 
 
@@ -284,6 +338,8 @@ def award_tender(tid: str, a: TenderAction):
     t["status"] = "awarded"
     t["updated"] = _now()
     _save_json(TENDERS_PATH, tenders)
+    if a.by and a.by != a.agent:
+        _credit(a.by, "altruism", 0.5, f"awarded {tid} to {a.agent}")
     _semantica({
         "category": "delegation",
         "scenario": f"AWARDED {tid}: {t['title'][:160]}",
@@ -310,6 +366,11 @@ def close_tender(tid: str, c: TenderClose):
     t["updated"] = _now()
     _save_json(TENDERS_PATH, tenders)
     who = c.agent or t["awarded_to"] or t["claimed_by"] or "?"
+    if who:
+        if who == t.get("created_by"):
+            _credit(who, "self", 1.0, f"closed own {tid}")
+        else:
+            _credit(who, "altruism", 2.0, f"closed {tid} for the network")
     _append(OUTCOMES_PATH, {
         "tender": tid,
         "agent": who,
@@ -369,7 +430,21 @@ def dispatch(d: DispatchIn):
 @app.post("/ack")
 def ack(a: AckIn):
     _append(ACKS_PATH, {"agent": a.agent, "mission_id": a.mission_id, "ts": _now()})
+    if a.agent:
+        _credit(a.agent, "altruism", 0.5, f"acked {a.mission_id or 'mission'}")
     return {"status": "acked", "agent": a.agent}
+
+
+# ── altruism / scoreboard ──────────────────────────────────────────────────
+
+@app.get("/altruism")
+def altruism():
+    return _altruism()
+
+
+@app.get("/scoreboard")
+def scoreboard():
+    return {"scoreboard": _scoreboard()}
 
 
 @app.get("/outcomes")
@@ -487,6 +562,7 @@ button{background:#238636;color:#fff;border:0;border-radius:6px;padding:8px 16px
 <div class="card"><h3>Dispatch agent</h3>
 <input id="agn" placeholder="agent"><input id="prm" placeholder="prompt" style="width:50%">
 <button onclick="dispatch()">Run</button></div>
+<div class="card"><h3>🏆 Altruism scoreboard</h3><div id="sb"><i>loading…</i></div></div>
 <div id="out"></div>
 <script>
 const api = '';
@@ -500,7 +576,10 @@ async function dispatch(){const a=document.getElementById('agn').value,p=documen
  document.getElementById('out').insertAdjacentHTML('afterbegin','<pre style="background:#000;padding:8px;border-radius:6px;max-height:200px;overflow:auto">'+JSON.stringify(await r.json(),null,2)+'</pre>')}
 async function load(){const b=await j('/board?limit=20');
  document.getElementById('out').innerHTML=(b.messages||[]).map(m=>`<div class="card"><span class="agent">@${m.from}</span> ${m.message.replace(/</g,'&lt;')}
- <div class="ts">${m.ts}</div></div>`).join('')}
+ <div class="ts">${m.ts}</div></div>`).join('');
+ const sb=await j('/scoreboard');
+ document.getElementById('sb').innerHTML='<table style="width:100%"><tr><th>agent</th><th>altruism</th><th>self</th><th>fitness</th><th>net giver</th></tr>'+
+ (sb.scoreboard||[]).map(r=>`<tr><td class="agent">${r.agent}</td><td>${r.altruism}</td><td>${r.self}</td><td>${r.fitness}</td><td>${r.net_giver?'✅':'—'}</td></tr>`).join('')+'</table>'}
 load();
 </script></body></html>
 """
