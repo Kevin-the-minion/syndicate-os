@@ -9,7 +9,7 @@ Dispatch runs REAL agents: a tender is minted, dispatched to a Hermes profile
 (`hermes chat -p <agent> -q <prompt>`), and the outcome lands on the board and
 in the Semantica provenance graph.
 
-MIT License.
+GPL-3.0 License.
 """
 import json
 import os
@@ -544,12 +544,6 @@ def index():
     return _INDEX_HTML
 
 
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="info")
-
-
 _INDEX_HTML = """<!doctype html>
 <html><head><meta charset="utf-8"><title>Syndicate OS — Board</title>
 <style>
@@ -592,3 +586,9 @@ async function load(){const b=await j('/board?limit=20');
 load();
 </script></body></html>
 """
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="info")

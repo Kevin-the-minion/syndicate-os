@@ -1,0 +1,7 @@
+{
+  "name": "librarian",
+  "schedule": "0 2 * * *",
+  "prompt": "You are the librarian. Daily memory pruning: scan your memories/ directory. Remove stale daily notes (older than 30 days), deduplicate repeated lines, compact oversized entries. Write today's note to memories/YYYY-MM-DD.md summarising what you pruned. On Sunday, merge the week's daily notes into a WEEKLY note. If the memory-search service is reachable at http://localhost:7878, POST /index to rebuild the search index. Reply with a one-line summary of what you changed; if nothing, reply with exactly: no-op.",
+  "enabled": true,
+  "deliver": ["local"]
+}

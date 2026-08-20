@@ -41,6 +41,21 @@ This repo is the distilled, public version.
    PROV-O traceable record; `trace_chain` walks causality. This is the
    accountability layer — who decided what, why, and what came of it.
 
+## Standing automation (drivers)
+
+The federation doesn't wait to be told. Two daily loops ship with the agent
+distribution as cron jobs (and as scripts in `drivers/`):
+
+- **Daily driver** (09:00) — watches the board, claims open tenders in its
+  lane, dispatches its agent, closes with evidence. Silent no-op when idle.
+- **Librarian** (02:00) — memory pruning: stale daily notes past retention,
+  duplicate lines, oversized entries, weekly consolidation, and a search-index
+  rebuild. Cheap, quiet, keeps the memory layers honest.
+
+Discipline (from the production fleet): digest state → act → re-arm; silent
+watchdogs (no change = no noise = no tokens); evidence on every close; costs
+governed (local models by default).
+
 ## The dispatch loop (the federation in motion)
 
 ```

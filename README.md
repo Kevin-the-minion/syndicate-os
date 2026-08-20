@@ -26,6 +26,11 @@ One command. You get:
 - 🍌 **OpenClaw minion fleet** — "Kevin's openclaws": spin up a parallel
   OpenClaw fleet with per-minion workspaces, models, gateways and tokens.
   Two harnesses = two architectures = no monoculture.
+- ⏰ **Standing drivers** — the daily driver (board-watching lane worker) and
+  the **librarian** (daily memory pruning: stale-note cleanup, dedupe,
+  compaction, weekly consolidation, search re-index). Ship as agent cron jobs
+  with the profile distribution, or scripted via crontab. Silent unless they
+  changed something.
 - 🔀 **Dispatch that actually runs agents** — a tender is minted → dispatched →
   a real agent (via `hermes chat -p <profile>`) works it → outcome lands on the
   board and in the Semantica graph.
@@ -61,6 +66,7 @@ Prerequisites: Linux (or WSL2/macOS), Docker, ~2 GB free, an LLM provider key
 | Council | `council/` | 70+ frames, trip tool, contract + verification gate |
 | Constitution | `constitution/` | config → generated constitution (`generate-constitution.py`) |
 | Minions | `minions/` | OpenClaw fleet spin-up (`setup-minions.sh`) |
+| Drivers | `drivers/` | standing automation: daily driver + librarian (memory pruning); cron jobs ship with the agent distribution |
 | Desktop registry | `desktop/register-connections.py` | one-command wiring into the Hermes desktop app |
 
 ## Optional: local LLM (Ollama)
@@ -117,8 +123,8 @@ set `FEDERATION_TOKEN` in `.env` and write endpoints require the
 
 ## License
 
-MIT. The Semantica engine is by its authors (PyPI: `semantica`); the bridge
-facade and federation service are fleet-written and MIT here.
+GPL-3.0. The Semantica engine is by its authors (PyPI: `semantica`); the bridge
+facade and federation service are fleet-written and GPL-3.0 here.
 
 **Security:** no keys in the repo. All credentials via `.env`. Bind services to
 127.0.0.1 or put them behind a VPN — this is a LAN tool by design.

@@ -1,0 +1,7 @@
+{
+  "name": "daily-driver",
+  "schedule": "0 9 * * *",
+  "prompt": "You are the daily driver for this federation. Read the board at http://localhost:8080/board and open tenders at http://localhost:8080/tenders. If an open tender matches your lane (or any lane when yours is empty), claim it (POST /tenders/<id>/claim), work it, post the outcome to the board (POST /post with from=<your profile name> and message=<outcome + evidence>), and close the tender (POST /tenders/<id>/close with evidence). Record the decision to semantica if reachable. If nothing is open, do nothing and reply with exactly: no-op.",
+  "enabled": true,
+  "deliver": ["local"]
+}

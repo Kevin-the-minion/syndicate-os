@@ -14,7 +14,7 @@ Endpoints:
   GET  /search/llm?q=    retrieve top-k, local LLM answers with sources
   GET  /health           ollama + index state
 
-MIT License.
+GPL-3.0 License.
 """
 import json
 import math

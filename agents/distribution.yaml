@@ -2,7 +2,7 @@ name: syndicate-agent
 version: 0.1.1
 description: Syndicate OS federation agent — board, tenders, provenance.
 author: Syndicate OS
-license: MIT
+license: GPL-3.0
 hermes_requires: '>=0.20.0'
 env_requires:
   - name: LLM_API_KEY
@@ -11,3 +11,4 @@ distribution_owned:
   - SOUL.md
   - memories/
   - skills/
+  - cron/

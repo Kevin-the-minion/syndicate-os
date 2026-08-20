@@ -170,7 +170,7 @@ psychedelic-council/
 
 ## License
 
-MIT.
+GPL-3.0. Fork it, improve it, share it back — that's the deal.
 
 ---
 
