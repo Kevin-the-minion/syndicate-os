@@ -1,6 +1,0 @@
-problem: test
-dose: standard
-backend: ollama
-model: llama3.1:8b
-roles: leader architect security strategist
-started: 20260820T224956Z

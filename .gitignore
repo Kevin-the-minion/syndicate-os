@@ -11,3 +11,7 @@ semantica/data/
 __pycache__/
 *.pyc
 .DS_Store
+
+# local run artifacts
+council/runs/
+*.log
