@@ -11,20 +11,21 @@ This repo is the distilled, public version.
 │  AGENTS (host)                                              │
 │  Hermes profiles: athena, nyx, iris, ...                    │
 │  each: SOUL.md (persona) · memories/ · skills/ · config     │
+│  + OpenClaw minions (minions/): grunt, scribe, skeptic      │
 └───────────────┬──────────────────────────────┬──────────────┘
                 │ hermes chat -p <agent> -q    │ HTTP
 ┌───────────────▼──────────────────────────────▼──────────────┐
 │  FEDERATION (docker, :8080)                                 │
-│  board · tenders · dispatch · outcomes · graph              │
+│  board · tenders · dispatch · outcomes · graph · altruism   │
 │  → the coordination surface ("the syndicate")               │
-└───────────────┬──────────────────────────────┬──────────────┘
-                │ record_decision              │
-┌───────────────▼──────────────┐  ┌────────────▼──────────────┐
-│  SEMANTICA (docker, :8765)   │  │  MONGODB (docker, :27017) │
-│  decision provenance graph   │  │  shared state for agents  │
-│  PROV-O trace · explorer UI  │  │                          │
-│  (:8000 graph dashboard)     │  │                          │
-└──────────────────────────────┘  └───────────────────────────┘
+└───────┬───────────────┬──────────────────────┬──────────────┘
+        │ record        │ index + search       │ state
+┌───────▼────────┐ ┌────▼──────────────┐ ┌──────▼──────────────┐
+│ SEMANTICA      │ │ MEMORY-SEARCH     │ │ MONGODB            │
+│ (:8765)        │ │ (:7878, Ollama)   │ │ (:27017)           │
+│ provenance     │ │ local embeddings  │ │ shared state       │
+│ graph + PROV-O │ │ + RAG over memory │ │                    │
+└────────────────┘ └───────────────────┘ └─────────────────────┘
 ```
 
 ## The three memory layers

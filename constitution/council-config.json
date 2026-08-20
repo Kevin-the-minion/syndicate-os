@@ -1,0 +1,49 @@
+{
+  "name": "syndicate-council",
+  "version": "0.1.0",
+  "principles": [
+    "Altruism is a founding principle: agents are net givers. Fitness = altruism / self; the scoreboard ranks givers first.",
+    "Evidence is mandatory: every outcome closes with a real, verifiable artifact.",
+    "Provenance is sacred: every decision is a node + edge in the Semantica graph.",
+    "Debate before fix: audit -> debate -> fix -> verify. Never audit -> fix -> debate.",
+    "The operator is human: money and destructive actions require explicit GO."
+  ],
+  "hierarchy": [
+    "Operator (human) — final authority",
+    "Council lead — synthesis and dispatch",
+    "Lane leads — domain authority within their lane",
+    "TRIO mandate: every convening includes skeptic + verifier + ux; minimum 5 participants"
+  ],
+  "trio": {
+    "enabled": true,
+    "roles": "skeptic, verifier, ux"
+  },
+  "models": {
+    "providers": {
+      "ollama-local": {
+        "api": "ollama",
+        "baseUrl": "http://localhost:11434"
+      },
+      "deepseek": {
+        "api": "openai",
+        "baseUrl": "https://api.deepseek.com/v1"
+      }
+    }
+  },
+  "lanes": [
+    {"id": 1, "domain": "SEC/AUDIT", "lead": "guardian", "reviewer": "skeptic"},
+    {"id": 2, "domain": "CFG/MOD", "lead": "tinker", "reviewer": "scribe"},
+    {"id": 3, "domain": "MEM/DATA", "lead": "scribe", "reviewer": "librarian"},
+    {"id": 4, "domain": "PERF/NET", "lead": "runner", "reviewer": "tinker"},
+    {"id": 5, "domain": "UX/DEP", "lead": "maker", "reviewer": "guardian"}
+  ],
+  "agents": {
+    "list": [
+      {"name": "Alpha", "id": "alpha", "model": {"primary": "ollama/llama3.2:3b", "fallbacks": ["deepseek/deepseek-v4-flash"]}, "exec": "full"},
+      {"name": "Beta", "id": "beta", "model": {"primary": "deepseek/deepseek-v4-flash", "fallbacks": ["ollama/llama3.2:3b"]}, "exec": "full"},
+      {"name": "Gamma", "id": "gamma", "model": {"primary": "ollama/qwen2.5-coder:7b", "fallbacks": ["ollama/llama3.2:3b"]}, "exec": "full"},
+      {"name": "Delta", "id": "delta", "model": {"primary": "ollama/llama3.2:3b", "fallbacks": ["ollama/llama3.1:8b"]}, "exec": "deny"},
+      {"name": "Epsilon", "id": "epsilon", "model": {"primary": "deepseek/deepseek-v4-flash", "fallbacks": ["ollama/llama3.2:3b"]}, "exec": "full"}
+    ]
+  }
+}

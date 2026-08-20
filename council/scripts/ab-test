@@ -1,0 +1,194 @@
+#!/usr/bin/env bash
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  🔬  A/B HARNESS — does the trip actually beat plain analysis?║
+# ╚══════════════════════════════════════════════════════════════╝
+#
+# The whole toolkit rests on one claim: forcing a model through an alien
+# representational frame surfaces findings that a straight expert prompt misses.
+# That claim is testable and, until you run this, untested.
+#
+# This harness runs both arms on the same problem, labels them A and B in random
+# order, and hides which is which until you have scored them.
+#
+#   ab-test "your problem"                 # print mode: two prompts + score sheet
+#   ab-test --api "your problem"           # runs both arms for real
+#   ab-test --reveal runs/ab-<stamp>       # unseal after scoring
+#
+# Score blind. Reveal last. Ten problems before you believe anything.
+
+set -euo pipefail
+
+if (( BASH_VERSINFO[0] < 4 )); then
+    echo "ERROR: bash 4+ required. macOS: brew install bash" >&2; exit 1
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROMPTS_DIR="${SCRIPT_DIR}/../prompts"
+RUNS_DIR="${TRIP_RUNS_DIR:-${SCRIPT_DIR}/../runs}"
+TRIP="${SCRIPT_DIR}/trip"
+
+ANTHROPIC_MODEL="${ANTHROPIC_MODEL:-claude-sonnet-5}"
+MAX_TOKENS="${TRIP_MAX_TOKENS:-2000}"
+
+write_score_sheet() {
+    local dir="$1" problem="$2"
+    cat > "${dir}/SCORE-SHEET.md" <<EOF
+# Blind score sheet
+
+**Problem:** ${problem}
+
+Read \`arm-A.md\` and \`arm-B.md\`. You do not know which is which. Score every
+finding in both before you reveal.
+
+## Per finding
+
+| Arm | # | Correct? | Actionable? | Non-obvious? | Would you act on it? |
+|-----|---|----------|-------------|--------------|----------------------|
+| A | 1 | | | | |
+| A | 2 | | | | |
+| A | 3 | | | | |
+| B | 1 | | | | |
+| B | 2 | | | | |
+| B | 3 | | | | |
+
+- **Correct** — true of the system as described (Y / N / can't tell)
+- **Actionable** — implies a specific next step (Y / N)
+- **Non-obvious** — a competent engineer asked the straight question would NOT
+  have reached it in the first few minutes (Y / N). This is the column the whole
+  hypothesis lives or dies on.
+- **Would you act on it** — Y / N. The honest bottom line.
+
+## Per arm
+
+|                                   | A | B |
+|-----------------------------------|---|---|
+| Findings that are correct         |   |   |
+| Findings that are non-obvious     |   |   |
+| Findings that are wrong           |   |   |
+| False alarms (invented severity)  |   |   |
+| Which arm would you rather have had? |   |   |
+
+## Before revealing, write your call
+
+> Which arm do you think was the trip, and why?
+
+> If the arms had been reversed, would your judgement change?
+
+Then: \`scripts/ab-test --reveal ${dir}\`
+
+## After ten problems
+
+The claim to test: **the trip arm produces more non-obvious-and-correct findings
+than the baseline arm, without producing more false alarms.**
+
+If it does — that is a real result, and worth writing up with the numbers.
+If it does not — this is a fun prompt pack, which is a fine thing to be. Say so
+in the README and stop claiming a mechanism.
+If the trip arm produces more findings but no more *correct* ones, you have built
+a machine for generating plausible text. That is the outcome to watch for.
+EOF
+}
+
+do_reveal() {
+    local dir="$1"
+    [[ -f "${dir}/.key" ]] || { echo "No sealed key in ${dir}" >&2; exit 1; }
+    echo "── REVEAL ─────────────────────────────────"
+    cat "${dir}/.key"
+    echo "───────────────────────────────────────────"
+}
+
+call_anthropic() {
+    local system="$1" user="$2" temp="$3"
+    [[ -n "${ANTHROPIC_API_KEY:-}" ]] || { echo "ERROR: ANTHROPIC_API_KEY not set" >&2; return 1; }
+    local body resp
+    body=$(jq -n --arg model "$ANTHROPIC_MODEL" --arg system "$system" \
+        --arg user "$user" --argjson temp "$temp" --argjson max "$MAX_TOKENS" \
+        '{model:$model, max_tokens:$max, temperature:$temp, system:$system,
+          messages:[{role:"user", content:$user}]}')
+    resp=$(curl -sS https://api.anthropic.com/v1/messages \
+        -H "x-api-key: ${ANTHROPIC_API_KEY}" \
+        -H "anthropic-version: 2023-06-01" \
+        -H "content-type: application/json" -d "$body")
+    if jq -e '.error' >/dev/null 2>&1 <<<"$resp"; then
+        echo "API ERROR: $(jq -r '.error.message' <<<"$resp")" >&2; return 1
+    fi
+    jq -r '[.content[] | select(.type=="text") | .text] | join("\n")' <<<"$resp"
+}
+
+main() {
+    local api=false dose="standard" roles="" auto=false problem=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --api)     api=true; shift ;;
+            --dose)    dose="${2:?}"; shift 2 ;;
+            --roles)   roles="${2:?}"; shift 2 ;;
+            --auto)    auto=true; shift ;;
+            --reveal)  do_reveal "${2:?--reveal needs a run dir}"; exit 0 ;;
+            --help|-h) sed -n '2,20p' "$0"; exit 0 ;;
+            -*)        echo "Unknown option: $1" >&2; exit 1 ;;
+            *)         problem="$1"; shift ;;
+        esac
+    done
+
+    [[ -n "$problem" ]] || { echo "ERROR: problem statement required" >&2; exit 1; }
+
+    local stamp dir
+    stamp=$(date -u +%Y%m%dT%H%M%SZ)
+    dir="${RUNS_DIR}/ab-${stamp}"
+    mkdir -p "$dir"
+
+    # Randomise which arm is which
+    local trip_arm baseline_arm
+    if (( RANDOM % 2 == 0 )); then trip_arm=A; baseline_arm=B; else trip_arm=B; baseline_arm=A; fi
+    {
+        echo "arm ${trip_arm} = TRIP (dose=${dose})"
+        echo "arm ${baseline_arm} = BASELINE (plain expert prompt)"
+        echo "problem: ${problem}"
+        echo "sealed: ${stamp}"
+    } > "${dir}/.key"
+
+    local trip_args=(--dose "$dose")
+    if   [[ -n "$roles" ]]; then trip_args+=(--roles "$roles")
+    elif $auto;             then trip_args+=(--auto)
+    fi
+
+    if $api; then
+        command -v jq >/dev/null || { echo "ERROR: needs jq" >&2; exit 1; }
+        echo "🔬 running both arms..." >&2
+
+        echo "   → baseline" >&2
+        call_anthropic "$(cat "${PROMPTS_DIR}/_baseline.md")" \
+            "$(printf 'THE PROBLEM\n%s\n' "$problem")" "0.60" \
+            > "${dir}/arm-${baseline_arm}.md"
+
+        echo "   → trip" >&2
+        TRIP_RUNS_DIR="${dir}/trip-internals" \
+            "$TRIP" --api --no-verify "${trip_args[@]}" "$problem" \
+            > "${dir}/arm-${trip_arm}.md" 2>/dev/null
+
+        echo "   both arms saved unlabelled." >&2
+    else
+        # Print mode: emit both prompts for manual running
+        cat "${PROMPTS_DIR}/_baseline.md" > "${dir}/arm-${baseline_arm}-PROMPT.md"
+        printf '\n---\n\nTHE PROBLEM\n%s\n' "$problem" >> "${dir}/arm-${baseline_arm}-PROMPT.md"
+        "$TRIP" "${trip_args[@]}" "$problem" > "${dir}/arm-${trip_arm}-PROMPT.md"
+        cat >&2 <<EOF
+🔬 Two prompt files written. Run each in a FRESH context — no shared history,
+   or the second arm sees the first arm's answers and the test is void.
+
+   ${dir}/arm-A-PROMPT.md
+   ${dir}/arm-B-PROMPT.md
+
+   Save the outputs as arm-A.md and arm-B.md in the same directory.
+EOF
+    fi
+
+    write_score_sheet "$dir" "$problem"
+    echo >&2
+    echo "run dir:     ${dir}" >&2
+    echo "score sheet: ${dir}/SCORE-SHEET.md" >&2
+    echo "reveal with: scripts/ab-test --reveal ${dir}" >&2
+}
+
+main "$@"
