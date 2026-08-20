@@ -1,0 +1,13 @@
+# secrets — never commit
+.env
+
+# runtime data
+*/data/
+data/
+federation/data/
+semantica/data/
+
+# local caches / junk
+__pycache__/
+*.pyc
+.DS_Store

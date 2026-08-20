@@ -1,0 +1,53 @@
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+
+  semantica:
+    build: ./semantica
+    image: syndicate/semantica:latest
+    restart: unless-stopped
+    environment:
+      SEMANTICA_PORT: "${SEMANTICA_PORT:-8765}"
+      SEMANTICA_DATA_DIR: /data
+    volumes:
+      - semantica-data:/data
+    ports:
+      - "${SEMANTICA_PORT:-8765}:8765"
+
+  explorer:
+    image: syndicate/semantica:latest
+    restart: unless-stopped
+    command: >
+      semantica-explorer --graph /data/context-graph.json
+      --port 8000 --host 0.0.0.0 --no-browser
+    volumes:
+      - semantica-data:/data
+    ports:
+      - "${EXPLORER_PORT:-8000}:8000"
+    depends_on:
+      - semantica
+
+  federation:
+    build: ./federation
+    restart: unless-stopped
+    environment:
+      FEDERATION_PORT: "${FEDERATION_PORT:-8080}"
+      SEMANTICA_API: http://semantica:8765
+      DATA_DIR: /data
+    volumes:
+      - federation-data:/data
+    ports:
+      - "${FEDERATION_PORT:-8080}:8080"
+    depends_on:
+      - semantica
+      - mongodb
+
+volumes:
+  mongo-data:
+  semantica-data:
+  federation-data:

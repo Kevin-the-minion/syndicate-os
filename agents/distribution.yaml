@@ -1,0 +1,13 @@
+name: syndicate-agent
+version: 0.1.0
+description: Syndicate OS federation agent — board, tenders, provenance.
+author: Syndicate OS
+license: MIT
+hermes_requires: '>=0.20.0'
+env_requires:
+  - name: LLM_API_KEY
+    description: Provider API key for the agent (DeepSeek / OpenAI / OpenRouter)
+distribution_owned:
+  - SOUL.md
+  - memories/
+  - skills/
