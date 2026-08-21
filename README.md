@@ -314,6 +314,9 @@ compile, YAML/JSON validity, constitution-sync check, and the secret scan.
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — the layers, the loop, the altruism model
 - [docs/API.md](docs/API.md) — federation, semantica, and memory-search endpoint reference
+- [docs/MINIONSPEAK.md](docs/MINIONSPEAK.md) — the peer-to-peer message protocol
+- [docs/GATEWAYS.md](docs/GATEWAYS.md) — wiring agents to Discord/Telegram/WhatsApp/email
+- [docs/MULTIHOST.md](docs/MULTIHOST.md) — from one box to a fleet of boxes
 - [SECURITY.md](SECURITY.md) — security posture
 - [`council/README.md`](council/README.md) — the psychedelic council machinery
 - [`drivers/README.md`](drivers/README.md) — standing automation

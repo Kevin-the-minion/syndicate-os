@@ -39,3 +39,35 @@ jobs:
             echo "secret-like string found"; exit 1
           fi
           echo "no secrets"
+
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build + start the stack
+        run: |
+          docker compose up -d --build mongodb semantica federation
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/health >/dev/null 2>&1 && break
+            sleep 3
+          done
+          curl -sf http://localhost:8080/health >/dev/null
+
+      - name: Federation round-trip
+        run: |
+          set -e
+          curl -sf -X POST http://localhost:8080/post -H 'Content-Type: application/json' \
+            -d '{"from":"ci","message":"smoke test"}' | grep -q posted
+          curl -sf http://localhost:8080/board | grep -q "smoke test"
+          T=$(curl -sf -X POST http://localhost:8080/tenders -H 'Content-Type: application/json' \
+            -d '{"title":"ci smoke","lane":"test"}')
+          echo "$T" | grep -q minted
+          curl -sf http://localhost:8080/scoreboard >/dev/null
+          curl -sf http://localhost:8080/graph | grep -q nodes
+          curl -sf http://localhost:8765/health | grep -q ok
+          echo "smoke ok"
+
+      - name: Shut down
+        if: always()
+        run: docker compose down -v

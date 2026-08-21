@@ -84,3 +84,10 @@ Each persona follows the same wake contract: brief = full context + output
 shape + board-post instruction. Customize freely — the production fleet gave
 each minion a real personality (SOUL-style) and it made them better
 collaborators.
+
+## Third harness note
+
+The production fleet also runs **OpenHarness** (Discord-native bots) as a
+third harness family. It's intentionally not packaged here — two harnesses
+(Hermes + OpenClaw) is already the anti-monoculture core; add a third when
+your workload actually needs a Discord-native surface.
