@@ -6,9 +6,9 @@ generated CONSTITUTION.md (it gets overwritten).
 
 Usage: python3 constitution/generate-constitution.py
 """
+import hashlib
 import json
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -45,7 +45,7 @@ def ollama_hosts(config: dict) -> list:
     return hosts
 
 
-def generate(config: dict) -> str:
+def generate(config: dict, stamp: str) -> str:
     agents = config.get("agents", {}).get("list", [])
     model_counts = count_models(config)
     providers = count_providers(model_counts)
@@ -57,8 +57,7 @@ def generate(config: dict) -> str:
 
     out = []
     out.append("# Council Constitution")
-    out.append(f"> **GENERATED {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}** "
-               f"from `council/council-config.json`")
+    out.append(f"> **GENERATED** from `council/council-config.json` (config sha256:{stamp})")
     out.append("> ⚠️ This file is AUTO-GENERATED. Edit `council-config.json`, then re-run "
                "`python3 constitution/generate-constitution.py`.")
     out.append("")
@@ -152,7 +151,8 @@ def generate(config: dict) -> str:
 
 def main() -> int:
     config = load_config(CONFIG_PATH)
-    OUTPUT_PATH.write_text(generate(config))
+    stamp = hashlib.sha256(CONFIG_PATH.read_bytes()).hexdigest()[:12]
+    OUTPUT_PATH.write_text(generate(config, stamp))
     print(f"wrote {OUTPUT_PATH}")
     return 0
 

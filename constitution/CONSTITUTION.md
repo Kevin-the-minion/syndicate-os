@@ -1,5 +1,5 @@
 # Council Constitution
-> **GENERATED 2026-08-21T00:20:08Z** from `council/council-config.json`
+> **GENERATED** from `council/council-config.json` (config sha256:f70437347099)
 > ⚠️ This file is AUTO-GENERATED. Edit `council-config.json`, then re-run `python3 constitution/generate-constitution.py`.
 
 ## 🏛️ Preamble
