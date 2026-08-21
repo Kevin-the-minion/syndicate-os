@@ -6,6 +6,15 @@ into a plain, falsifiable technical claim.
 
 ---
 
+## Related
+
+- **`TRIPFIX.md`** — the full audit-and-repair discipline (trip-fix v4.5):
+  debate-before-fix, skeptic-first, verifier-after-fixes, TRIO quorum,
+  minimum five participants, cost tracing. The trip tool in this directory
+  is Phase 2 of that loop.
+
+---
+
 ## Status of the core claim
 
 > **Hypothesis (UNTESTED):** forcing a model through a radically different

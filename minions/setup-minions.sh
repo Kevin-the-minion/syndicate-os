@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ── setup-minions.sh — spin up an OpenClaw minion fleet ────────────────────
-# "Kevin's openclaws": a parallel OpenClaw agent fleet, each minion with its
+# "Parallel OpenClaw agents": a parallel OpenClaw agent fleet, each minion with its
 # own isolated workspace + gateway token (no shared runtime), exactly like the
 # production fleet. Minions complement the Hermes agents (different harness =
 # different blind spots — anti-monoculture by construction).

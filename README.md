@@ -126,7 +126,7 @@ outcome lands on the board and in the Semantica graph. `scripts/demo.sh`
 shows the whole loop firing in 60 seconds.
 
 ### 🍌 OpenClaw minion fleet
-"Kevin's openclaws": spin up a parallel OpenClaw fleet with per-minion
+"Parallel OpenClaw agents": spin up a parallel OpenClaw fleet with per-minion
 workspaces, models, gateways, and tokens (`minions/setup-minions.sh`).
 The federation doesn't care which harness does the work — only that evidence lands.
 
@@ -209,15 +209,15 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the deep dive.
 
 | Component | Path | Port | What it is |
 |---|---|---|---|
-| Agent distribution | `agents/` | — | Hermes profile: SOUL, memories, skills, cron jobs |
+| Agent distribution | `agents/` | — | Hermes profile: SOUL, AGENTS (workspace rules), memories, skills, cron jobs |
 | Federation | `federation/` | 8080 | Board, tenders, dispatch, outcomes, graph, altruism, UI |
 | Semantica API | `semantica/` | 8765 | Provenance: `/record_decision`, `/trace_chain`, `/nodes` |
 | Semantica explorer | `semantica/` | 8000 | Interactive graph dashboard |
 | Memory search | `memory-search/` | 7878 | Local-LLM search: `/search`, `/search/llm` |
 | MongoDB | — | 27017 | Shared state layer |
 | Constitution | `constitution/` | — | Config → generated constitution |
-| Council | `council/` | — | 70+ frames, trip tool, contract, verification gate |
-| Minions | `minions/` | — | OpenClaw fleet spin-up |
+| Council | `council/` | — | 70+ frames, trip tool, contract, verification gate, trip-fix discipline (`TRIPFIX.md`) |
+| Minions | `minions/` | — | OpenClaw fleet spin-up + 10 SOUL-grade personas |
 | Drivers | `drivers/` | — | Daily driver + librarian + service watchdog (standing automation) |
 | Cost | `cost/` | — | Token/cost watchdog (silent when under budget) |
 | Desktop registry | `desktop/` | — | Connections pre-wirer for the Hermes desktop app |

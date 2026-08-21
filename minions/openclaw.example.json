@@ -1,0 +1,17 @@
+{
+  "_comment": "Example OpenClaw gateway config for a full syndicate council. Each entry under agents.list is a FIRST-CLASS agent: it has its own session, its own inbox, and can send/receive federation messages. Never emulate these agents with anonymous sub-processes — a stand-in has no inbox and cannot reply. Roster = this list.",
+  "agents": {
+    "list": [
+      {"agent_id": "lead",      "name": "Lead",      "model": "deepseek/deepseek-v4-flash", "workspace": "~/.openclaw/workspace/lead",      "exec": "full"},
+      {"agent_id": "skeptic",   "name": "Skeptic",   "model": "deepseek/deepseek-v4-flash", "workspace": "~/.openclaw/workspace/skeptic",   "exec": "full"},
+      {"agent_id": "verifier",  "name": "Verifier",  "model": "ollama/llama3.2:3b",         "workspace": "~/.openclaw/workspace/verifier",  "exec": "full"},
+      {"agent_id": "guardian",  "name": "Guardian",  "model": "deepseek/deepseek-v4-flash", "workspace": "~/.openclaw/workspace/guardian",  "exec": "full"},
+      {"agent_id": "tinker",    "name": "Tinker",    "model": "ollama/qwen2.5-coder:7b",    "workspace": "~/.openclaw/workspace/tinker",    "exec": "full"},
+      {"agent_id": "scribe",    "name": "Scribe",    "model": "ollama/llama3.2:3b",         "workspace": "~/.openclaw/workspace/scribe",    "exec": "full"},
+      {"agent_id": "librarian", "name": "Librarian", "model": "ollama/llama3.2:3b",         "workspace": "~/.openclaw/workspace/librarian", "exec": "full"},
+      {"agent_id": "runner",    "name": "Runner",    "model": "ollama/llama3.2:3b",         "workspace": "~/.openclaw/workspace/runner",    "exec": "full"},
+      {"agent_id": "maker",     "name": "Maker",     "model": "deepseek/deepseek-v4-flash", "workspace": "~/.openclaw/workspace/maker",     "exec": "full"},
+      {"agent_id": "grunt",     "name": "Grunt",     "model": "ollama/llama3.2:3b",         "workspace": "~/.openclaw/workspace/grunt",     "exec": "full"}
+    ]
+  }
+}

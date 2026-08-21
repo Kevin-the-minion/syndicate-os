@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Semantica Bridge — REST Facade for Council Decision Provenance
-P1 per Athena's design + P1.5 infrastructure entity ingestion (Kevin, 2026-08-13)
+P1 design + P1.5 infrastructure entity ingestion (syndicate, 2026-08-13)
 
 Endpoints:
   POST /record_decision   — record a council decision with PROV-O trace
@@ -34,7 +34,7 @@ from semantica.provenance import ProvenanceManager
 
 # ── Config ─────────────────────────────────────────────────────────
 PORT = int(os.environ.get("SEMANTICA_PORT", "8765"))
-DATA_DIR = Path(os.environ.get("SEMANTICA_DATA_DIR", "/home/chris/semantica-bridge-data"))
+DATA_DIR = Path(os.environ.get("SEMANTICA_DATA_DIR", "~/.syndicate/semantica-bridge-data")).expanduser()
 OUTBOX_PATH = DATA_DIR / "decisions-outbox.jsonl"
 GRAPH_PATH = DATA_DIR / "context-graph.json"
 START_TIME = time.time()
@@ -151,7 +151,7 @@ except Exception as e:
 app = FastAPI(
     title="Semantica Bridge — Council Decision Provenance",
     version="0.2.0",
-    description="Thin REST facade for Semantica ContextGraph + ProvenanceManager (Athena P1 + Kevin infra ingestion)"
+    description="Thin REST facade for Semantica ContextGraph + ProvenanceManager (syndicate P1 + infra ingestion)"
 )
 
 app.add_middleware(
@@ -197,7 +197,7 @@ class EntityEdge(BaseModel):
 class IngestRequest(BaseModel):
     nodes: List[EntityNode] = []
     edges: List[EntityEdge] = []
-    source: Optional[str] = "kevin"
+    source: Optional[str] = "syndicate"
 
 
 # ── Helpers ────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 # Council Constitution
-> **GENERATED 2026-08-20T22:44:05Z** from `council/council-config.json`
+> **GENERATED 2026-08-21T00:20:08Z** from `council/council-config.json`
 > ⚠️ This file is AUTO-GENERATED. Edit `council-config.json`, then re-run `python3 constitution/generate-constitution.py`.
 
 ## 🏛️ Preamble
@@ -7,29 +7,34 @@
 This council is a federation of autonomous agents. Coordination is public, evidence is mandatory, and every decision is traceable. **The pursuit of altruism is a founding principle**: agents are net givers, not hoarders — fitness is measured by what you contribute to the collective.
 
 ## 🤖 Models Deployed
-**3 unique models** across 5 agent assignments:
+**3 unique models** across 10 agent assignments:
 
-- `ollama/llama3.2:3b` — 2 agents (🏠 local)
-- `deepseek/deepseek-v4-flash` — 2 agents (☁️ cloud)
+- `ollama/llama3.2:3b` — 5 agents (🏠 local)
+- `deepseek/deepseek-v4-flash` — 4 agents (☁️ cloud)
 - `ollama/qwen2.5-coder:7b` — 1 agents (🏠 local)
 
 ### Provider Distribution
-- **ollama**: 3 primaries
-- **deepseek**: 2 primaries
+- **ollama**: 6 primaries
+- **deepseek**: 4 primaries
 
 ### Local Model Hosts
 - `ollama-local` → http://localhost:11434
 
 ## 👥 Agent Roster
-**5 agents deployed:**
+**10 agents deployed:**
 
 | Agent | Primary Model | Model Type | Fallbacks | Exec |
 |-------|--------------|------------|-----------|------|
-| Alpha (alpha) | `ollama/llama3.2:3b` | 🏠 local | deepseek/deepseek-v4-flash | full |
-| Beta (beta) | `deepseek/deepseek-v4-flash` | ☁️ cloud | ollama/llama3.2:3b | full |
-| Gamma (gamma) | `ollama/qwen2.5-coder:7b` | 🏠 local | ollama/llama3.2:3b | full |
-| Delta (delta) | `ollama/llama3.2:3b` | 🏠 local | ollama/llama3.1:8b | deny |
-| Epsilon (epsilon) | `deepseek/deepseek-v4-flash` | ☁️ cloud | ollama/llama3.2:3b | full |
+| Lead (lead) | `deepseek/deepseek-v4-flash` | ☁️ cloud | ollama/llama3.2:3b | full |
+| Skeptic (skeptic) | `deepseek/deepseek-v4-flash` | ☁️ cloud | ollama/llama3.2:3b | full |
+| Verifier (verifier) | `ollama/llama3.2:3b` | 🏠 local | deepseek/deepseek-v4-flash | full |
+| Guardian (guardian) | `deepseek/deepseek-v4-flash` | ☁️ cloud | ollama/llama3.2:3b | full |
+| Tinker (tinker) | `ollama/qwen2.5-coder:7b` | 🏠 local | ollama/llama3.2:3b | full |
+| Scribe (scribe) | `ollama/llama3.2:3b` | 🏠 local | deepseek/deepseek-v4-flash | full |
+| Librarian (librarian) | `ollama/llama3.2:3b` | 🏠 local | deepseek/deepseek-v4-flash | full |
+| Runner (runner) | `ollama/llama3.2:3b` | 🏠 local | deepseek/deepseek-v4-flash | full |
+| Maker (maker) | `deepseek/deepseek-v4-flash` | ☁️ cloud | ollama/llama3.2:3b | full |
+| Grunt (grunt) | `ollama/llama3.2:3b` | 🏠 local | deepseek/deepseek-v4-flash | full |
 
 ## 🏛️ Council Structure
 
@@ -37,10 +42,11 @@ This council is a federation of autonomous agents. Coordination is public, evide
 | Lane | Domain | Lead | Reviewer |
 |------|--------|------|----------|
 | 1 | SEC/AUDIT | guardian | skeptic |
-| 2 | CFG/MOD | tinker | scribe |
-| 3 | MEM/DATA | scribe | librarian |
+| 2 | CFG/MOD | tinker | verifier |
+| 3 | MEM/DATA | librarian | scribe |
 | 4 | PERF/NET | runner | tinker |
-| 5 | UX/DEP | maker | guardian |
+| 5 | UX/DEP | maker | skeptic |
+| 6 | EXEC/OPS | grunt | verifier |
 
 ### Decision Hierarchy
 1. Operator (human) — final authority
