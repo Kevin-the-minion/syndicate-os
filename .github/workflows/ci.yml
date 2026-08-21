@@ -59,6 +59,17 @@ jobs:
             sleep 3
           done
           curl -sf http://localhost:8765/health >/dev/null
+        shell: bash
+
+      - name: Diagnose startup failure
+        if: failure()
+        run: |
+          echo "== docker compose ps =="
+          docker compose ps -a
+          for c in mongodb semantica federation; do
+            echo "== logs: $c =="
+            docker compose logs --tail 60 "$c" || docker logs "syndicate-os-$c-1" --tail 60 2>&1 || true
+          done
 
       - name: Federation round-trip
         run: |
