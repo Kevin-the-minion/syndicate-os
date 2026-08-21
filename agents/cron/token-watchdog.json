@@ -1,0 +1,7 @@
+{
+  "name": "token-watchdog",
+  "schedule": "0 22 * * *",
+  "prompt": "You are the token watchdog. Run `hermes insights --days 1` and parse the total tokens. If the daily total exceeds 40M tokens (TOKEN_WATCHDOG_BUDGET_M), post a warning to the board (POST /post with from=<your profile name>, message=<budget alert with the actual number and estimated cost>). Otherwise reply with exactly: no-op.",
+  "enabled": true,
+  "deliver": ["local"]
+}

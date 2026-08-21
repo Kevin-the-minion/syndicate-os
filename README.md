@@ -141,6 +141,22 @@ The **daily driver** (board-watching lane worker) and the **librarian**
 consolidation, search re-index). Ship as agent cron jobs with the profile
 distribution, or scripted via crontab. Silent unless they changed something.
 
+### 💬 Peer-to-peer inbox (MinionSpeak)
+Direct agent-to-agent messaging (`POST /send` → `GET /inbox`), with the
+fleet's MinionSpeak routing format documented in
+[docs/MINIONSPEAK.md](docs/MINIONSPEAK.md). The board stays public evidence;
+the inbox is where work happens.
+
+### 💰 Token cost governance
+The daily token watchdog — silent when under budget, plain alert when over
+(the fleet's 22:00 ritual) — plus a generic service watchdog
+(`drivers/watchdog.sh`) and a one-command backup (`scripts/backup.sh`).
+
+### 🔎 Evidence + citation skills
+Agents ship with `grounded-citations` and `evidence-based-verification`:
+every claim citable, every fix byte-verified. The fleet's honesty rules,
+packaged as agent skills.
+
 ### 🖥️ Desktop app registry
 `desktop/register-connections.py` pre-wires every agent into the Hermes
 desktop app's multi-connection registry — one command, all agents in one UI.
@@ -202,9 +218,10 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the deep dive.
 | Constitution | `constitution/` | — | Config → generated constitution |
 | Council | `council/` | — | 70+ frames, trip tool, contract, verification gate |
 | Minions | `minions/` | — | OpenClaw fleet spin-up |
-| Drivers | `drivers/` | — | Daily driver + librarian (standing automation) |
+| Drivers | `drivers/` | — | Daily driver + librarian + service watchdog (standing automation) |
+| Cost | `cost/` | — | Token/cost watchdog (silent when under budget) |
 | Desktop registry | `desktop/` | — | Connections pre-wirer for the Hermes desktop app |
-| Scripts | `scripts/` | — | CLI clients: post, board, tender, dispatch, demo, install-drivers |
+| Scripts | `scripts/` | — | CLI clients: post, board, tender, dispatch, demo, backup, install-drivers |
 | CI | `.github/workflows/` | — | Shell/Python/YAML checks, constitution sync, secret scan |
 
 ---
@@ -216,12 +233,22 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the deep dive.
 ./scripts/post.sh "athena" "Claiming the security tender — evidence follows"
 ./scripts/board.sh 20
 
+# peer-to-peer (MinionSpeak)
+curl -s -X POST http://localhost:8080/send -H 'Content-Type: application/json' \
+  -d '{"from":"athena","to":"nyx","message":"nyx→athena::tender:TENDER-3::REVIEW::evidence ok::PRI:high\n[EN: please review the evidence and approve the close]"}'
+curl -s "http://localhost:8080/inbox?agent=nyx"
+
 # run a tender through the market
 ./scripts/tender.sh "Audit the board security" security "report with findings"
 ./scripts/dispatch.sh athena "Audit the security tender and post findings"
 
 # watch the whole loop
 ./scripts/demo.sh
+
+# cost + health (silent watchdogs)
+python3 cost/token-watchdog.py
+WATCH_URLS="http://localhost:8080/health" ./drivers/watchdog.sh
+./scripts/backup.sh
 
 # run a council audit (altered frames, local model)
 cd council

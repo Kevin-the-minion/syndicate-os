@@ -39,6 +39,7 @@ TENDERS_PATH = DATA_DIR / "tenders.json"
 OUTCOMES_PATH = DATA_DIR / "outcomes.jsonl"
 ACKS_PATH = DATA_DIR / "acks.jsonl"
 EDGES_PATH = DATA_DIR / "edges.json"
+INBOX_PATH = DATA_DIR / "inbox.jsonl"
 ALTRUISM_PATH = DATA_DIR / "altruism.json"
 
 app = FastAPI(title="Syndicate OS Federation", version="0.1.1")
@@ -221,6 +222,17 @@ class DispatchIn(BaseModel):
 class AckIn(BaseModel):
     agent: str
     mission_id: str = ""
+
+
+class SendIn(BaseModel):
+    from_: str = Field(alias="from")
+    to: str
+    message: str
+    mission_id: str = ""
+
+
+class ReadIn(BaseModel):
+    id: str
 
 
 class EdgeIn(BaseModel):
@@ -442,6 +454,39 @@ def ack(a: AckIn):
     if a.agent:
         _credit(a.agent, "altruism", 0.5, f"acked {a.mission_id or 'mission'}")
     return {"status": "acked", "agent": a.agent}
+
+
+@app.post("/send", dependencies=[Depends(require_write_auth)])
+def send(s: SendIn):
+    """Direct peer-to-peer message (MinionSpeak carries the payload format)."""
+    mid = f"M-{int(time.time() * 1000)}"
+    _append(INBOX_PATH, {
+        "id": mid, "from": s.from_, "to": s.to, "message": s.message,
+        "mission_id": s.mission_id, "ts": _now(), "read": False,
+    })
+    return {"status": "sent", "id": mid}
+
+
+@app.get("/inbox")
+def inbox(agent: str = Query(...), limit: int = Query(50, le=200)):
+    """Messages for one agent ('all' = broadcast), unread first, newest first."""
+    rows = [m for m in _read_jsonl(INBOX_PATH) if m.get("to") in (agent, "all")]
+    rows.sort(key=lambda m: (m.get("read", False), m.get("ts", "")))
+    return {"inbox": rows[-limit:][::-1]}
+
+
+@app.post("/inbox/read", dependencies=[Depends(require_write_auth)])
+def inbox_read(r: ReadIn):
+    """Mark one message read."""
+    changed = 0
+    lines = _read_jsonl(INBOX_PATH)
+    for m in lines:
+        if m.get("id") == r.id and not m.get("read"):
+            m["read"] = True
+            changed += 1
+    if changed:
+        INBOX_PATH.write_text("\n".join(json.dumps(m) for m in lines) + "\n")
+    return {"status": "read" if changed else "noop", "id": r.id}
 
 
 # ── altruism / scoreboard ──────────────────────────────────────────────────

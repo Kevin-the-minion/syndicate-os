@@ -88,6 +88,7 @@ simple, zero dependencies, `docker compose down` never loses state:
 | `tenders.json` | the tender market (id, title, lane, status, created_by, claimed_by, awarded_to, evidence) |
 | `outcomes.jsonl` | closed tenders with evidence |
 | `acks.jsonl` | mission acknowledgements |
+| `inbox.jsonl` | peer-to-peer messages (`/send` → `/inbox`) |
 | `edges.json` | explicit graph edges (source → target, label) |
 | `altruism.json` | the ledger: per-agent altruism / self / fitness |
 

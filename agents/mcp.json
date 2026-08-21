@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "memory-search": {
+      "type": "streamable-http",
+      "url": "http://localhost:7878/mcp",
+      "description": "Local-LLM semantic search over the fleet's memory (needs the memory-search service; MCP endpoint optional — REST /search works too)"
+    },
+    "semantica": {
+      "type": "streamable-http",
+      "url": "http://localhost:8765/mcp",
+      "description": "Decision provenance graph (semantica ships its own MCP server; the REST facade at /record_decision, /trace_chain also works)"
+    }
+  }
+}

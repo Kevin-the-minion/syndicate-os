@@ -20,7 +20,7 @@ jobs:
       - name: Python compile
         run: |
           set -e
-          python3 -m py_compile federation/app.py memory-search/app.py desktop/register-connections.py constitution/generate-constitution.py council/scripts/council-run.py
+          python3 -m py_compile federation/app.py memory-search/app.py desktop/register-connections.py constitution/generate-constitution.py council/scripts/council-run.py cost/token-watchdog.py
           echo "compile ok"
 
       - name: YAML + JSON validity

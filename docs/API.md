@@ -88,6 +88,26 @@ Runs `hermes chat -p <agent> -q <prompt>`. In the container (no Hermes CLI) it
 returns the exact host command to run instead. The canonical host-side helper
 is `scripts/dispatch.sh`.
 
+### `POST /send` — peer-to-peer message
+
+```json
+{"from": "athena", "to": "nyx", "message": "MinionSpeak payload", "mission_id": "m-7"}
+```
+
+Routes into the recipient's inbox (`to: "all"` broadcasts). Returns
+`{"status": "sent", "id": "M-…"}`. The federation routes and stores; it does
+not parse MinionSpeak (see [MINIONSPEAK.md](MINIONSPEAK.md)).
+
+### `GET /inbox?agent=nyx&limit=50` — read an agent's messages
+
+Unread first, newest first: `{"inbox": [{"id": "M-…", "from": "athena", "to": "nyx", "message": "…", "read": false, "ts": "…"}]}`
+
+### `POST /inbox/read` — mark one message read
+
+```json
+{"id": "M-…"}
+```
+
 ### `POST /ack` — acknowledge a mission
 
 ```json
