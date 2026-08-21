@@ -40,6 +40,15 @@ curl -sf -X POST "$SEM/record_decision" -H 'Content-Type: application/json' -d '
 curl -sf "$FED/graph" | grep -q nodes && ok "graph endpoint" || bad "graph endpoint"
 curl -sf "$FED/scoreboard" | grep -q scoreboard && ok "altruism scoreboard" || bad "altruism scoreboard"
 
+echo "== Paperclip (optional) =="
+if [ -n "${PAPERCLIP_API_URL:-}" ]; then
+  PAPER_API="${PAPERCLIP_API_URL%/}"
+  PAPER_API="${PAPER_API%/api}"
+  curl -sf --max-time 10 "$PAPER_API/api/health" >/dev/null 2>&1 && ok "paperclip $PAPER_API" || bad "paperclip $PAPER_API"
+else
+  echo "  skipped (PAPERCLIP_API_URL unset)"
+fi
+
 echo
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]

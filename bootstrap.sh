@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-echo "==> [1/5] Docker check"
+echo "==> [1/6] Docker check"
 if ! command -v docker >/dev/null 2>&1; then
   echo "Docker is required. Install it, e.g.:"
   echo "  Debian/Ubuntu: sudo apt-get install -y docker.io docker-compose-v2 && sudo systemctl enable --now docker"
@@ -11,7 +11,7 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "==> [2/5] .env"
+echo "==> [2/6] .env"
 if [ ! -f .env ]; then
   cp .env.example .env
   echo "  .env created from example. Set LLM_API_KEY (and tweak AGENT_NAMES), then re-run."
@@ -23,7 +23,7 @@ if [ -z "${LLM_API_KEY:-}" ] || [ "$LLM_API_KEY" = "sk-your-key-here" ]; then
   exit 1
 fi
 
-echo "==> [3/5] Hermes Agent"
+echo "==> [3/6] Hermes Agent"
 if ! command -v hermes >/dev/null 2>&1; then
   echo "  installing Hermes Agent (official installer)..."
   curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
@@ -31,7 +31,7 @@ if ! command -v hermes >/dev/null 2>&1; then
 fi
 hermes --version | head -1
 
-echo "==> [4/5] Seed agents"
+echo "==> [4/6] Seed agents"
 IFS=',' read -ra AGENTS <<< "${AGENT_NAMES:-athena,nyx,iris}"
 mkdir -p "$HOME/.hermes"
 if ! grep -q "^LLM_API_KEY=" "$HOME/.hermes/.env" 2>/dev/null; then
@@ -53,9 +53,17 @@ for name in "${AGENTS[@]}"; do
 done
 echo "  profiles: $(hermes profile list | tr '\n' ' ')"
 
-echo "==> [5/5] Docker stack"
+echo "==> [5/6] Docker stack"
 docker compose up -d --build
 sleep 5
+
+echo "==> [6/6] Paperclip control plane (optional)"
+if [ "${PAPERCLIP_ENABLE:-0}" = "1" ] && [ -n "${PAPERCLIP_API_URL:-}" ]; then
+  ./paperclip/provision-agents.sh
+else
+  echo "  skipped — set PAPERCLIP_ENABLE=1 + PAPERCLIP_API_URL to provision agents"
+  echo "  into a Paperclip control plane (see paperclip/README.md)"
+fi
 
 echo
 echo "✅ Syndicate OS is up:"
@@ -63,6 +71,7 @@ echo "  Board UI:      http://localhost:${FEDERATION_PORT:-8080}"
 echo "  Semantica API: http://localhost:${SEMANTICA_PORT:-8765}"
 echo "  Explorer:      http://localhost:${EXPLORER_PORT:-8000}"
 echo "  MongoDB:       localhost:${MONGO_PORT:-27017}"
+echo "  Paperclip:     ${PAPERCLIP_API_URL:-not configured}"
 echo "  Agents:        ${AGENT_NAMES:-athena,nyx,iris}"
 echo
 echo "Smoke test: ./verify.sh"
