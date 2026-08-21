@@ -52,6 +52,13 @@ jobs:
             sleep 3
           done
           curl -sf http://localhost:8080/health >/dev/null
+          # Semantica boots slower (heavier imports) — wait for it too, or
+          # the round-trip's health check races the container startup.
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8765/health >/dev/null 2>&1 && break
+            sleep 3
+          done
+          curl -sf http://localhost:8765/health >/dev/null
 
       - name: Federation round-trip
         run: |
