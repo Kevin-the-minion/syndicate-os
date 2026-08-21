@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # ── Syndicate OS verify — smoke test everything ────────────────────────────
+# NOTE: requires the live stack (docker compose up + seeded agents). Not a
+# unit test — it writes test posts/tenders to a real board. For bare-checkout
+# CI, run the .github/workflows checks instead.
 set -uo pipefail
 cd "$(dirname "$0")"
 set -a; [ -f .env ] && source .env; set +a

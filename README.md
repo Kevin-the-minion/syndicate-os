@@ -266,7 +266,10 @@ curl "http://localhost:7878/search?q=what+did+we+decide+about+security"
 
 ## Configuration
 
-All configuration lives in `.env` (see [`.env.example`](.env.example)):
+All configuration lives in `.env` (see [`.env.example`](.env.example)) —
+**`.env` is the only place credentials live.** It is gitignored; never commit
+it. CI scans every push for secret-shaped strings and fails the build if one
+appears, so a key in the repo is a red flag, not a hidden feature.
 
 | Variable | Default | Purpose |
 |---|---|---|
