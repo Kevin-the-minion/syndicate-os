@@ -27,7 +27,8 @@ RUN pip install --no-cache-dir --quiet \
     rich \
     pyyaml \
     toml \
-    chardet
+    chardet \
+    python-dateutil
 
 # Pin the version the bridge was written against; --no-deps skips the
 # torch/transformers/spacy/... bloat entirely.
