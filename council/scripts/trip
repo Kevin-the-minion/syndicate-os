@@ -107,6 +107,7 @@ dose_temp() {
     local pct=$(( base + jitter ))
     printf '0.%02d' "$pct"
     [[ $pct -eq 100 ]] && printf '\b\b\b1.00' # never happens; guard only
+    return 0
 }
 
 dose_modifier() {
