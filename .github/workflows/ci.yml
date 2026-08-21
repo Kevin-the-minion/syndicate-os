@@ -16,7 +16,6 @@ jobs:
           for f in bootstrap.sh verify.sh scripts/*.sh drivers/*.sh minions/setup-minions.sh; do
             bash -n "$f" && echo "ok: $f"
           done
-
       - name: Python compile
         run: |
           set -e
@@ -24,7 +23,7 @@ jobs:
           echo "compile ok"
 
       - name: YAML + JSON validity
-        run: python3 -c "import json,yaml; [yaml.safe_load(open(f)) or print('yaml ok:',f) for f in ['docker-compose.yml','agents/distribution.yaml']]; json.load(open('constitution/council-config.json')); print('json ok')"
+        run: python3 -c "import json,yaml; [yaml.safe_load(open(f)) or print('yaml ok:',f) for f in ['docker-compose.yml','docker-compose.cluster.yml','agents/distribution.yaml']]; json.load(open('constitution/council-config.json')); print('json ok')"
 
       - name: Constitution is in sync
         run: |

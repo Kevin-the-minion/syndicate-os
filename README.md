@@ -328,6 +328,7 @@ compile, YAML/JSON validity, constitution-sync check, and the secret scan.
 - [docs/MINIONSPEAK.md](docs/MINIONSPEAK.md) — the peer-to-peer message protocol
 - [docs/GATEWAYS.md](docs/GATEWAYS.md) — wiring agents to Discord/Telegram/WhatsApp/email
 - [docs/MULTIHOST.md](docs/MULTIHOST.md) — from one box to a fleet of boxes
+- [docs/CLUSTER.md](docs/CLUSTER.md) — deploy the whole federation on a brand-new bare 3-node cluster (control / data / inference): hosts, VLAN, storage, node roles, bring-up
 - [SECURITY.md](SECURITY.md) — security posture
 - [`council/README.md`](council/README.md) — the psychedelic council machinery
 - [`drivers/README.md`](drivers/README.md) — standing automation

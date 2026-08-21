@@ -1,0 +1,50 @@
+# ── Syndicate OS — cluster-mode override (3-node: control / data / inference) ──
+# Use with docker compose -f docker-compose.yml -f docker-compose.cluster.yml
+# Single-host behavior is untouched when this file is NOT used.
+#
+# Node roles (selected via compose profiles, guarded by bootstrap.sh):
+#   data      -> mongodb, semantica, explorer      (run on the DATA host)
+#   control   -> federation, memory-search         (run on the CONTROL host)
+#   inference -> no compose services; runs Ollama on the host (GPU)
+#
+# In cluster mode the control node talks to Mongo on the data host and Ollama
+# on the inference host — both as env-driven external endpoints, never via
+# compose service names.
+
+services:
+  mongodb:
+    profiles: ["data"]
+    ports:
+      # Bind on the LAN so the control node can reach Mongo in cluster mode.
+      - "0.0.0.0:${MONGO_PORT:-27017}:27017"
+    volumes:
+      - "${DATA_ROOT:-./data}/mongo:/data/db"
+
+  semantica:
+    profiles: ["data"]
+    volumes:
+      - "${DATA_ROOT:-./data}/semantica:/data"
+
+  explorer:
+    profiles: ["data"]
+    volumes:
+      - "${DATA_ROOT:-./data}/semantica:/data"
+
+  federation:
+    profiles: ["control"]
+    environment:
+      # External Mongo (data node) instead of the compose service name.
+      MONGO_HOST: "${MONGO_HOST:-data}"
+      SEMANTICA_API: "http://${DATA_HOST:-data}:${SEMANTICA_PORT:-8765}"
+    volumes:
+      - "${DATA_ROOT:-./data}/federation:/data"
+    depends_on: []
+
+  memory-search:
+    profiles: ["control"]
+    environment:
+      OLLAMA_API: "${OLLAMA_API:-http://${INFERENCE_HOST:-inference}:11434}"
+      SEMANTICA_API: "http://${DATA_HOST:-data}:${SEMANTICA_PORT:-8765}"
+    volumes:
+      - "${DATA_ROOT:-./data}/federation:/data"
+    depends_on: []

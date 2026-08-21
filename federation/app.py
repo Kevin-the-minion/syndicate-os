@@ -29,6 +29,8 @@ from pydantic import BaseModel, ConfigDict, Field
 PORT = int(os.environ.get("FEDERATION_PORT", "8080"))
 DATA_DIR = Path(os.environ.get("DATA_DIR", "./data"))
 SEMANTICA_API = os.environ.get("SEMANTICA_API", "http://localhost:8765")
+# Mongo probe target: compose service name on single-host, external host in cluster mode.
+MONGO_HOST = os.environ.get("MONGO_HOST", "mongodb")
 HERMES_BIN = os.environ.get("HERMES_BIN", "hermes")
 DISPATCH_TIMEOUT = int(os.environ.get("DISPATCH_TIMEOUT", "300"))
 FEDERATION_TOKEN = os.environ.get("FEDERATION_TOKEN", "")
@@ -569,7 +571,7 @@ def health():
         sem = False
     mongo = False
     try:
-        with urllib.request.urlopen("http://mongodb:27017", timeout=3) as resp:
+        with urllib.request.urlopen(f"http://{MONGO_HOST}:27017", timeout=3) as resp:
             mongo = True
     except Exception:  # noqa: BLE001
         pass

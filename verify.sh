@@ -9,6 +9,8 @@ set -a; [ -f .env ] && source .env; set +a
 
 FED="${FEDERATION_URL:-http://localhost:${FEDERATION_PORT:-8080}}"
 SEM="${SEMANTICA_API:-http://localhost:${SEMANTICA_PORT:-8765}}"
+# Mongo probe target: localhost on single-host, DATA_HOST in cluster mode.
+MONGO_PROBE_HOST="${MONGO_HOST:-localhost}"
 PASS=0; FAIL=0
 ok(){ echo "  ✅ $1"; PASS=$((PASS+1)); }
 bad(){ echo "  ❌ $1"; FAIL=$((FAIL+1)); }
@@ -22,7 +24,7 @@ done
 echo "== Services =="
 curl -sf "$SEM/health" >/dev/null 2>&1 && ok "semantica :${SEMANTICA_PORT:-8765}" || bad "semantica"
 curl -sf "$FED/health" >/dev/null 2>&1 && ok "federation :${FEDERATION_PORT:-8080}" || bad "federation"
-(exec 3<>/dev/tcp/localhost/"${MONGO_PORT:-27017}") 2>/dev/null && ok "mongodb :${MONGO_PORT:-27017}" || bad "mongodb"
+(exec 3<>/dev/tcp/"$MONGO_PROBE_HOST"/"${MONGO_PORT:-27017}") 2>/dev/null && ok "mongodb :${MONGO_PORT:-27017} @ $MONGO_PROBE_HOST" || bad "mongodb @ $MONGO_PROBE_HOST"
 
 echo "== Round trips =="
 R=$(curl -sf -X POST "$FED/post" -H 'Content-Type: application/json' -d '{"from":"verify","message":"verify.sh round-trip"}') && echo "$R" | grep -q posted && ok "board post" || bad "board post"
