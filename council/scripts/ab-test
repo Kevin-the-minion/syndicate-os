@@ -115,12 +115,45 @@ call_anthropic() {
     jq -r '[.content[] | select(.type=="text") | .text] | join("\n")' <<<"$resp"
 }
 
+OLLAMA_MODEL="${OLLAMA_MODEL:-llama3.1:8b}"
+OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
+BACKEND="${BACKEND:-ollama}"
+
+call_ollama() {
+    local system="$1" user="$2" temp="$3"
+    local seed=$(( RANDOM * 32768 + RANDOM ))
+    local body resp
+    body=$(jq -n \
+        --arg model "$OLLAMA_MODEL" \
+        --arg system "$system" \
+        --arg user "$user" \
+        --argjson temp "$temp" \
+        --argjson seed "$seed" \
+        '{model:$model, stream:false,
+          messages:[{role:"system",content:$system},{role:"user",content:$user}],
+          options:{temperature:$temp, seed:$seed}}')
+    resp=$(curl -sS "${OLLAMA_HOST}/api/chat" -H 'content-type: application/json' -d "$body")
+    if jq -e '.error' >/dev/null 2>&1 <<<"$resp"; then
+        echo "OLLAMA ERROR: $(jq -r '.error' <<<"$resp")" >&2; return 1
+    fi
+    jq -r '.message.content' <<<"$resp"
+}
+
+call_model() {
+    case "$BACKEND" in
+        anthropic) call_anthropic "$@" ;;
+        ollama)    call_ollama "$@" ;;
+        *) echo "ERROR: unknown backend: $BACKEND" >&2; return 1 ;;
+    esac
+}
+
 main() {
     local api=false dose="standard" roles="" auto=false problem=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --api)     api=true; shift ;;
+            --backend) BACKEND="${2:?--backend needs a value}"; shift 2 ;;
             --dose)    dose="${2:?}"; shift 2 ;;
             --roles)   roles="${2:?}"; shift 2 ;;
             --auto)    auto=true; shift ;;
@@ -158,13 +191,13 @@ main() {
         echo "🔬 running both arms..." >&2
 
         echo "   → baseline" >&2
-        call_anthropic "$(cat "${PROMPTS_DIR}/_baseline.md")" \
+        call_model "$(cat "${PROMPTS_DIR}/_baseline.md")" \
             "$(printf 'THE PROBLEM\n%s\n' "$problem")" "0.60" \
             > "${dir}/arm-${baseline_arm}.md"
 
         echo "   → trip" >&2
         TRIP_RUNS_DIR="${dir}/trip-internals" \
-            "$TRIP" --api --no-verify "${trip_args[@]}" "$problem" \
+            "$TRIP" --api --backend "$BACKEND" --no-verify "${trip_args[@]}" "$problem" \
             > "${dir}/arm-${trip_arm}.md" 2>/dev/null
 
         echo "   both arms saved unlabelled." >&2

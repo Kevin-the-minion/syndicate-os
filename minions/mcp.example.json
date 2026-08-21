@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "skeptic-minion": {
+      "command": "openclaw",
+      "args": ["mcp", "serve", "--url", "wss://<minion-ip>:<port>", "--token-file", "/path/to/gateway.token"]
+    },
+    "memory-search": {
+      "url": "http://<host>:7878/mcp",
+      "transport": "streamable-http"
+    },
+    "semantica": {
+      "url": "http://<host>:8765/mcp",
+      "transport": "streamable-http"
+    }
+  }
+}
