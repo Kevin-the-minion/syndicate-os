@@ -197,8 +197,8 @@ main() {
 
         echo "   → trip" >&2
         TRIP_RUNS_DIR="${dir}/trip-internals" \
-            "$TRIP" --api --backend "$BACKEND" --no-verify "${trip_args[@]}" "$problem" \
-            > "${dir}/arm-${trip_arm}.md" 2>/dev/null
+            "${SCRIPT_DIR}/arm-trip.sh" "$problem" \
+            > "${dir}/arm-${trip_arm}.md" 2> "${dir}/trip-arm.err"
 
         echo "   both arms saved unlabelled." >&2
     else
