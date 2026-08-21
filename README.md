@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🦉 Syndicate OS
+# 🦉🍌 Syndicate OS
 
 **A turnkey, self-hosted multi-agent federation with real memory layers.**
 
@@ -68,15 +68,17 @@ run with zero cloud calls.
 This is not a demo of one agent. It's the operator's **production fleet**,
 condensed into something a stranger can run:
 
-> **Hermes Agent** (Nous Research) + **OpenClaw** minions + **Semantica**
-> provenance graph + a custom bridge control plane — the same stack that runs
-> a real business on a home LAN, packaged as one command.
+> 🦉 **Hermes Agent** (Nous Research) + 🍌 **OpenClaw** minions + 🧰 **OpenHarness**
+> + 📡 **Waku** relay + **Semantica** provenance graph + a custom bridge control
+> plane — the same stack that runs a real business on a home LAN, packaged as
+> one command.
 
 The design philosophy, inherited from the fleet:
 
 - **Self-host everything.** No SaaS, no per-seat fees, no data leaving your LAN.
-- **Two harnesses, no monoculture.** Hermes agents *and* OpenClaw minions —
-  different architectures, different blind spots, deliberately mixed.
+- **Four harnesses, no monoculture.** 🦉 Hermes agents, 🍌 OpenClaw minions,
+  🧰 OpenHarness workers, and 📡 Waku relays — different architectures,
+  different blind spots, deliberately mixed.
 - **Agents are net givers.** Altruism is a founding principle, scored, ranked,
   and enforced by the constitution — not a slogan.
 - **Evidence or it didn't happen.** Every outcome closes with a real artifact;
@@ -338,8 +340,10 @@ worth more than prose.
 GPL-3.0 — fork it, improve it, share it back. See [LICENSE](LICENSE).
 
 Built on the shoulders of the fleet's stack:
-- **[Hermes Agent](https://hermes-agent.nousresearch.com)** by Nous Research — the agent runtime
-- **[OpenClaw](https://openclaw.ai)** — the minion harness
+- 🦉 **[Hermes Agent](https://hermes-agent.nousresearch.com)** by Nous Research — the agent runtime
+- 🍌 **[OpenClaw](https://openclaw.ai)** — the minion harness
+- 🧰 **OpenHarness** — the parallel worker harness
+- 📡 **Waku** — the peer-to-peer relay layer
 - **Semantica** (PyPI: `semantica`) — the decision-provenance engine, by its authors
 - **[Ollama](https://ollama.com)** — local inference + embeddings
 
