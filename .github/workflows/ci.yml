@@ -56,15 +56,24 @@ jobs:
       - name: Federation round-trip
         run: |
           set -e
-          curl -sf -X POST http://localhost:8080/post -H 'Content-Type: application/json' \
-            -d '{"from":"ci","message":"smoke test"}' | grep -q posted
-          curl -sf http://localhost:8080/board | grep -q "smoke test"
-          T=$(curl -sf -X POST http://localhost:8080/tenders -H 'Content-Type: application/json' \
-            -d '{"title":"ci smoke","lane":"test"}')
-          echo "$T" | grep -q minted
-          curl -sf http://localhost:8080/scoreboard >/dev/null
-          curl -sf http://localhost:8080/graph | grep -q nodes
-          curl -sf http://localhost:8765/health | grep -q ok
+          fail() { echo "❌ $1"; echo "   body: $2"; exit 1; }
+          echo "-- /post"
+          R=$(curl -sf -X POST http://localhost:8080/post -H 'Content-Type: application/json' -d '{"from":"ci","message":"smoke test"}') || fail "/post curl" "$?"
+          echo "$R" | grep -q posted || fail "/post body" "$R"
+          echo "-- /board"
+          R=$(curl -sf http://localhost:8080/board) || fail "/board curl" "$?"
+          echo "$R" | grep -q "smoke test" || fail "/board body" "${R:0:300}"
+          echo "-- /tenders"
+          T=$(curl -sf -X POST http://localhost:8080/tenders -H 'Content-Type: application/json' -d '{"title":"ci smoke","lane":"test"}') || fail "/tenders curl" "$?"
+          echo "$T" | grep -q minted || fail "/tenders body" "$T"
+          echo "-- /scoreboard"
+          R=$(curl -sf http://localhost:8080/scoreboard) || fail "/scoreboard" "$?"
+          echo "-- /graph"
+          R=$(curl -sf http://localhost:8080/graph) || fail "/graph curl" "$?"
+          echo "$R" | grep -q nodes || fail "/graph body" "${R:0:300}"
+          echo "-- semantica /health"
+          R=$(curl -sf http://localhost:8765/health) || fail "semantica /health curl" "$?"
+          echo "$R" | grep -q ok || fail "semantica /health body" "${R:0:300}"
           echo "smoke ok"
 
       - name: Shut down
