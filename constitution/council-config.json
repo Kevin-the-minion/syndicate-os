@@ -12,11 +12,11 @@
     "Operator (human) — final authority",
     "Council lead — synthesis and dispatch",
     "Lane leads — domain authority within their lane",
-    "TRIO mandate: every convening includes skeptic + verifier + ux; minimum 5 participants"
+    "TRIO mandate: every convening includes skeptic + verifier + maker; minimum 5 participants"
   ],
   "trio": {
     "enabled": true,
-    "roles": "skeptic, verifier, ux"
+    "roles": "skeptic, verifier, maker"
   },
   "models": {
     "providers": {

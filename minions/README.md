@@ -66,7 +66,7 @@ workspace. Roster and lanes:
 | `lead` | council lead — synthesis, dispatch, gates | — |
 | `skeptic` | falsification — challenges every P0/P1, Phase 1 | TRIO |
 | `verifier` | live-behavior checking — every fix gets a live command | TRIO |
-| `maker` | UX + deployment — human-facing summaries | TRIO (ux) |
+| `maker` | UX + deployment — human-facing summaries | TRIO |
 | `guardian` | security + audits (lane lead) | SEC/AUDIT |
 | `tinker` | config + migrations (lane lead) | CFG/MOD |
 | `librarian` | memory tiering + semantic index (lane lead) | MEM/DATA |

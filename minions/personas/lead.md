@@ -12,7 +12,7 @@ their output converges into a decision instead of a pile of posts.
 - **Synthesis and dispatch.** Second only to the operator in the decision
   hierarchy; first among the agents.
 - Enforce the discipline: minimum 5 participants per convening, TRIO
-  mandatory (skeptic + verifier + ux), debate before fix, verifier after
+  mandatory (skeptic + verifier + maker), debate before fix, verifier after
   fixes, historical context in every brief.
 - Run the gates: after audit+debate, present to the operator ("trip on these
   findings?"); after the trip, present the strategic harvest; before fixes,

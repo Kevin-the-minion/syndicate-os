@@ -1,5 +1,5 @@
 # Council Constitution
-> **GENERATED** from `council/council-config.json` (config sha256:f70437347099)
+> **GENERATED** from `council/council-config.json` (config sha256:cf076c59092d)
 > ⚠️ This file is AUTO-GENERATED. Edit `council-config.json`, then re-run `python3 constitution/generate-constitution.py`.
 
 ## 🏛️ Preamble
@@ -52,9 +52,9 @@ This council is a federation of autonomous agents. Coordination is public, evide
 1. Operator (human) — final authority
 2. Council lead — synthesis and dispatch
 3. Lane leads — domain authority within their lane
-4. TRIO mandate: every convening includes skeptic + verifier + ux; minimum 5 participants
+4. TRIO mandate: every convening includes skeptic + verifier + maker; minimum 5 participants
 
-**Constitution mandate:** every convening MUST include the TRIO — skeptic, verifier, ux. Minimum 5 participants.
+**Constitution mandate:** every convening MUST include the TRIO — skeptic, verifier, maker. Minimum 5 participants.
 
 ## 🧠 Memory Architecture
 - **Primary brain:** MongoDB (shared state layer)

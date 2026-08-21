@@ -12,6 +12,9 @@ into a plain, falsifiable technical claim.
   debate-before-fix, skeptic-first, verifier-after-fixes, TRIO quorum,
   minimum five participants, cost tracing. The trip tool in this directory
   is Phase 2 of that loop.
+- **`AB-TEST-PLAN.md`** — the ready-to-run plan for settling the core
+  hypothesis: 10-problem set, judge protocol, pass criteria. The harness is
+  `scripts/ab-test`.
 
 ---
 
